@@ -1,0 +1,121 @@
+import json
+
+class Contact:
+    def __init__(self, name, phone_number, email_address):
+        self.name = name
+        self.phone_number = phone_number
+        self.email_address = email_address
+
+class ContactManager:
+    def __init__(self, filename):
+        self.filename = filename
+        self.contacts = self.load_contacts()
+
+    def load_contacts(self):
+        try:
+            with open(self.filename, 'r') as file:
+                data = json.load(file)
+                return [Contact(contact['name'], contact['phone_number'], contact['email_address']) for contact in data]
+        except FileNotFoundError:
+            return []
+
+    def save_contacts(self):
+        data = [{'name': contact.name, 'phone_number': contact.phone_number, 'email_address': contact.email_address} for contact in self.contacts]
+        with open(self.filename, 'w') as file:
+            json.dump(data, file, indent=4)
+
+    def add_contact(self, name, phone_number, email_address):
+        new_contact = Contact(name, phone_number, email_address)
+        self.contacts.append(new_contact)
+        self.save_contacts()
+        print(f"Contact {name} added successfully!")
+
+    def view_contacts(self):
+        if not self.contacts:
+            print("No contacts found.")
+        else:
+            for contact in self.contacts:
+                print(f"Name: {contact.name}, Phone Number: {contact.phone_number}, Email Address: {contact.email_address}")
+                
+                
+    def view_cont(self,name):
+
+        for contact in self.contacts:
+            if contact.name == name:
+                print(f"Name={name}\t Number={contact.phone_number}")
+                
+                
+    def edit_contact(self, name, new_phone_number=None, new_email_address=None):
+        for contact in self.contacts:
+            if contact.name == name:
+                if new_phone_number:
+                    contact.phone_number = new_phone_number
+                if new_email_address:
+                    contact.email_address = new_email_address
+                self.save_contacts()
+                print(f"Contact {name} updated successfully!")
+                return
+        print(f"Contact {name} not found.")
+
+    def delete_contact(self, name):
+        for contact in self.contacts:
+            if contact.name == name:
+                self.contacts.remove(contact)
+                self.save_contacts()
+                print(f"Contact {name} deleted successfully!")
+                return
+        print(f"Contact {name} not found.")
+
+def main():
+    filename = 'contacts.json'
+    contact_manager = ContactManager(filename)
+
+    while True:
+        print("-------------------------")
+        print("Contact Manager Menu:")
+        print("1. Add Contact")
+        print("2. View Contacts")
+        print("3. Edit Contact")
+        print("4. Search a contact")
+        print("5. Delete Contact")
+        print("6. Exit")
+        print("-------------------------")
+
+        choice = input("Enter your choice: ")
+
+        if choice == "1":
+            print("-------------------------")
+            name = input("What's the person's name? ")
+            phone_number = input("What's their phone number? ")
+            email_address = input("What's their email address? ")
+            contact_manager.add_contact(name, phone_number, email_address)
+            print("-------------------------")
+        elif choice == "2":
+            contact_manager.view_contacts()
+        elif choice == "3":
+            print("-------------------------")
+            name = input("Whose details do you want to change? ")
+            new_phone = input("New phone number (leave blank if no change): ")
+            new_email = input("New email address (leave blank if no change): ")
+            contact_manager.edit_contact(name, new_phone_number or None, new_email_address or None)
+            print("-------------------------")
+        elif choice == "4":
+            print("-------------------------")
+            name = input("Enter contact name to view: ")
+            contact_manager.view_cont(name)
+            print("-------------------------")
+        elif choice == "5":
+            print("-------------------------")
+            name = input("Enter contact name to delete: ")
+            contact_manager.delete_contact(name)
+            print("-------------------------")
+        elif choice == "6":
+            print("-------------------------")
+            print("Thanks for using our contact manager!")
+            print("-------------------------")
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+if __name__ == "__main__":
+    main()
